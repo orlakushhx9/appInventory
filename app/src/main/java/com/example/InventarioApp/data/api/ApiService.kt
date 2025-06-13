@@ -1,6 +1,6 @@
-package com.example.myapplication.data.api
+package com.example.InventarioApp.data.api
 
-import com.example.myapplication.data.model.Producto
+import com.example.InventarioApp.data.model.Producto
 import retrofit2.Response
 import retrofit2.http.*
 
