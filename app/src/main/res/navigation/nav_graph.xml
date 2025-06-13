@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/productsFragment"
-        android:name="com.example.myapplication.ui.ProductsFragment"
+        android:name="com.example.InventarioApp.ui.ProductsFragment"
         android:label="Productos" />
 
 </navigation> 

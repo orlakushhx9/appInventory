@@ -49,4 +49,6 @@
     <string name="low_stock_warning">Low stock warning</string>
     <string name="confirm_delete">Are you sure you want to delete this product?</string>
     <string name="inicia_sesi_n">Inicia Sesión</string>
+    <string name="navigation_drawer_open">Abrir menú de navegación</string>
+    <string name="navigation_drawer_close">Cerrar menú de navegación</string>
 </resources>
