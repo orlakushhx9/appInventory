@@ -1,13 +1,13 @@
-package com.example.myapplication.data
+package com.example.InventarioApp.data
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.myapplication.data.dao.UserDao
-import com.example.myapplication.data.dao.ProductDao
-import com.example.myapplication.data.entity.User
-import com.example.myapplication.data.entity.Product
+import com.example.InventarioApp.data.dao.UserDao
+import com.example.InventarioApp.data.dao.ProductDao
+import com.example.InventarioApp.data.entity.User
+import com.example.InventarioApp.data.entity.Product
 
 @Database(entities = [User::class, Product::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
