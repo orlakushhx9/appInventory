@@ -1,30 +1,47 @@
 package com.example.InventarioApp.viewmodel
 
 import androidx.lifecycle.*
+import com.example.InventarioApp.data.FirebaseProductService
 import com.example.InventarioApp.data.entity.Product
-import com.example.InventarioApp.repository.ProductRepository
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
-class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
+class ProductViewModel(
+    private val firebaseService: FirebaseProductService
+) : ViewModel() {
     private val _productOperationResult = MutableLiveData<Result<Unit>>()
     val productOperationResult: LiveData<Result<Unit>> = _productOperationResult
 
-    val allProducts = repository.getAllProducts()
+    private val _operationMessage = MutableLiveData<String>()
+    val operationMessage: LiveData<String> = _operationMessage
+
+    val allProducts = firebaseService.getAllProducts()
+        .catch { e -> 
+            _productOperationResult.value = Result.failure(e)
+        }
         .asLiveData(viewModelScope.coroutineContext)
 
-    val lowStockProducts = repository.getLowStockProducts()
+    val lowStockProducts = firebaseService.getLowStockProducts()
+        .catch { e -> 
+            _productOperationResult.value = Result.failure(e)
+        }
         .asLiveData(viewModelScope.coroutineContext)
 
-    fun getProductsByCategory(category: String) = repository.getProductsByCategory(category)
+    fun getProductsByCategory(category: String) = firebaseService.getProductsByCategory(category)
+        .catch { e -> 
+            _productOperationResult.value = Result.failure(e)
+        }
         .asLiveData(viewModelScope.coroutineContext)
 
     fun addProduct(product: Product) {
         viewModelScope.launch {
             try {
-                repository.insertProduct(product)
+                firebaseService.addProduct(product)
                 _productOperationResult.value = Result.success(Unit)
+                _operationMessage.value = "Producto agregado correctamente"
             } catch (e: Exception) {
                 _productOperationResult.value = Result.failure(e)
+                _operationMessage.value = "Error al agregar el producto: ${e.message}"
             }
         }
     }
@@ -32,10 +49,12 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
     fun updateProduct(product: Product) {
         viewModelScope.launch {
             try {
-                repository.updateProduct(product)
+                firebaseService.updateProduct(product)
                 _productOperationResult.value = Result.success(Unit)
+                _operationMessage.value = "Producto actualizado correctamente"
             } catch (e: Exception) {
                 _productOperationResult.value = Result.failure(e)
+                _operationMessage.value = "Error al actualizar el producto: ${e.message}"
             }
         }
     }
@@ -43,10 +62,12 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
     fun deleteProduct(product: Product) {
         viewModelScope.launch {
             try {
-                repository.deleteProduct(product)
+                firebaseService.deleteProduct(product)
                 _productOperationResult.value = Result.success(Unit)
+                _operationMessage.value = "Producto eliminado correctamente"
             } catch (e: Exception) {
                 _productOperationResult.value = Result.failure(e)
+                _operationMessage.value = "Error al eliminar el producto: ${e.message}"
             }
         }
     }
@@ -54,10 +75,16 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
     fun updateStock(productId: Long, amount: Int) {
         viewModelScope.launch {
             try {
-                repository.updateStock(productId, amount)
+                firebaseService.updateStock(productId, amount)
                 _productOperationResult.value = Result.success(Unit)
+                _operationMessage.value = if (amount > 0) {
+                    "Stock aumentado correctamente"
+                } else {
+                    "Stock reducido correctamente"
+                }
             } catch (e: Exception) {
                 _productOperationResult.value = Result.failure(e)
+                _operationMessage.value = "Error al actualizar el stock: ${e.message}"
             }
         }
     }

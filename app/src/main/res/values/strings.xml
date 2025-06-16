@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Inventory Manager</string>
+    <string name="app_name">Sistema De Inventario</string>
     
     <!-- Auth -->
     <string name="login">Inicia Sesión</string>
@@ -51,4 +51,5 @@
     <string name="inicia_sesi_n">Inicia Sesión</string>
     <string name="navigation_drawer_open">Abrir menú de navegación</string>
     <string name="navigation_drawer_close">Cerrar menú de navegación</string>
+    <string name="olvidaste_tu_contrase_a">¿Olvidaste tu contraseña?</string>
 </resources>

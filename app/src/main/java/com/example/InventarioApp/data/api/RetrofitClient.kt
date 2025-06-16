@@ -12,7 +12,7 @@ import javax.net.ssl.X509TrustManager
 
 object RetrofitClient {
     //Cambio de URL de consumo API
-    private const val BASE_URL = "https://api-production-21eb.up.railway.app/"
+    private const val BASE_URL = "https://api-production-53ca.up.railway.app"
 
     private fun getUnsafeOkHttpClient(): OkHttpClient {
         val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {

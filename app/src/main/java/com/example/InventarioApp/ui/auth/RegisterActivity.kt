@@ -5,10 +5,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.InventarioApp.R
-import com.example.InventarioApp.data.AppDatabase
 import com.example.InventarioApp.data.GoogleAuthManager
 import com.example.InventarioApp.databinding.ActivityRegisterBinding
-import com.example.InventarioApp.repository.UserRepository
 import com.example.InventarioApp.viewmodel.AuthViewModel
 import com.example.InventarioApp.viewmodel.AuthViewModelFactory
 
@@ -27,12 +25,10 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun setupViewModel() {
-        val database = AppDatabase.getDatabase(applicationContext)
-        val repository = UserRepository(database.userDao())
         val googleAuthManager = GoogleAuthManager(this)
         viewModel = ViewModelProvider(
             this,
-            AuthViewModelFactory(repository, googleAuthManager)
+            AuthViewModelFactory(googleAuthManager)
         )[AuthViewModel::class.java]
     }
 

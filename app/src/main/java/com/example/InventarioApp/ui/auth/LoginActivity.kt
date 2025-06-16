@@ -9,12 +9,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.InventarioApp.MainActivity
 import com.example.InventarioApp.R
-import com.example.InventarioApp.data.AppDatabase
 import com.example.InventarioApp.data.GoogleAuthManager
 import com.example.InventarioApp.databinding.ActivityLoginBinding
-import com.example.InventarioApp.repository.UserRepository
 import com.example.InventarioApp.viewmodel.AuthViewModel
 import com.example.InventarioApp.viewmodel.AuthViewModelFactory
+import android.widget.TextView
+import com.google.firebase.auth.FirebaseAuth
+import android.app.AlertDialog
+import android.widget.EditText
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -42,6 +44,34 @@ class LoginActivity : AppCompatActivity() {
         setupViewModel()
         setupClickListeners()
         observeViewModel()
+
+        val tvForgotPassword = findViewById<TextView>(R.id.tvForgotPassword)
+        tvForgotPassword.setOnClickListener {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Recuperar contraseña")
+            builder.setMessage("Ingresa tu correo electrónico para recuperar tu contraseña:")
+            val input = EditText(this)
+            input.hint = "Correo electrónico"
+            builder.setView(input)
+            builder.setPositiveButton("Enviar") { dialog, _ ->
+                val email = input.text.toString().trim()
+                if (email.isNotEmpty()) {
+                    FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val intent = Intent(this, ForgotPasswordConfirmationActivity::class.java)
+                                startActivity(intent)
+                            } else {
+                                Toast.makeText(this, "No se pudo enviar el correo. Verifica el email.", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                } else {
+                    Toast.makeText(this, "Por favor ingresa un correo válido.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            builder.setNegativeButton("Cancelar", null)
+            builder.show()
+        }
     }
 
     private fun setupGoogleAuth() {
@@ -49,21 +79,19 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setupViewModel() {
-        val database = AppDatabase.getDatabase(applicationContext)
-        val repository = UserRepository(database.userDao())
         viewModel = ViewModelProvider(
-            this, 
-            AuthViewModelFactory(repository, googleAuthManager)
+            this,
+            AuthViewModelFactory(googleAuthManager)
         )[AuthViewModel::class.java]
     }
 
     private fun setupClickListeners() {
         binding.loginButton.setOnClickListener {
-            val username = binding.usernameEdit.text.toString()
+            val email = binding.usernameEdit.text.toString()
             val password = binding.passwordEdit.text.toString()
 
-            if (validateInput(username, password)) {
-                viewModel.login(username, password)
+            if (validateInput(email, password)) {
+                viewModel.login(email, password)
             }
         }
 
@@ -99,11 +127,11 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun validateInput(username: String, password: String): Boolean {
+    private fun validateInput(email: String, password: String): Boolean {
         var isValid = true
 
-        if (username.isBlank()) {
-            binding.usernameLayout.error = "Username is required"
+        if (email.isBlank()) {
+            binding.usernameLayout.error = "Email is required"
             isValid = false
         } else {
             binding.usernameLayout.error = null
