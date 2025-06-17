@@ -6,33 +6,42 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.InventarioApp.data.GoogleAuthManager
-import com.example.InventarioApp.data.entity.User
-import com.example.InventarioApp.repository.UserRepository
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 
 class AuthViewModel(
-    private val repository: UserRepository,
     private val googleAuthManager: GoogleAuthManager
 ) : ViewModel() {
-    private val _loginResult = MutableLiveData<Result<User>>()
-    val loginResult: LiveData<Result<User>> = _loginResult
+    private val _loginResult = MutableLiveData<Result<FirebaseUser>>()
+    val loginResult: LiveData<Result<FirebaseUser>> = _loginResult
 
     private val _googleSignInResult = MutableLiveData<Result<FirebaseUser>>()
     val googleSignInResult: LiveData<Result<FirebaseUser>> = _googleSignInResult
 
-    private val _registerResult = MutableLiveData<Result<Long>>()
-    val registerResult: LiveData<Result<Long>> = _registerResult
+    private val _registerResult = MutableLiveData<Result<FirebaseUser>>()
+    val registerResult: LiveData<Result<FirebaseUser>> = _registerResult
 
-    fun login(username: String, password: String) {
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    fun login(email: String, password: String) {
         viewModelScope.launch {
             try {
-                val user = repository.login(username, password)
-                if (user != null) {
-                    _loginResult.value = Result.success(user)
-                } else {
-                    _loginResult.value = Result.failure(Exception("Invalid credentials"))
-                }
+                auth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val user = auth.currentUser
+                            if (user != null) {
+                                _loginResult.value = Result.success(user)
+                            } else {
+                                _loginResult.value = Result.failure(Exception("Usuario no encontrado"))
+                            }
+                        } else {
+                            _loginResult.value = Result.failure(task.exception ?: Exception("Error de autenticación"))
+                        }
+                    }
             } catch (e: Exception) {
                 _loginResult.value = Result.failure(e)
             }
@@ -50,7 +59,13 @@ class AuthViewModel(
                     firebaseResult.onSuccess {
                         val firebaseUser = googleAuthManager.getCurrentUser()
                         if (firebaseUser != null) {
-                            android.util.Log.d("AuthViewModel", "Firebase user signed in: ${firebaseUser.email}")
+                            // Guardar datos en Firestore si es nuevo
+                            val userMap = hashMapOf(
+                                "uid" to firebaseUser.uid,
+                                "email" to firebaseUser.email,
+                                "displayName" to (firebaseUser.displayName ?: "")
+                            )
+                            db.collection("users").document(firebaseUser.uid).set(userMap)
                             _googleSignInResult.value = Result.success(firebaseUser)
                         } else {
                             android.util.Log.e("AuthViewModel", "Firebase user is null after sign-in")
@@ -74,13 +89,27 @@ class AuthViewModel(
     fun register(username: String, email: String, password: String, fullName: String) {
         viewModelScope.launch {
             try {
-                val user = User(
-                    username = username,
-                    email = email,
-                    password = password,
-                    fullName = fullName
-                )
-                _registerResult.value = repository.register(user)
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val user = auth.currentUser
+                            if (user != null) {
+                                // Guardar datos adicionales en Firestore
+                                val userMap = hashMapOf(
+                                    "uid" to user.uid,
+                                    "email" to user.email,
+                                    "username" to username,
+                                    "fullName" to fullName
+                                )
+                                db.collection("users").document(user.uid).set(userMap)
+                                _registerResult.value = Result.success(user)
+                            } else {
+                                _registerResult.value = Result.failure(Exception("Usuario no encontrado tras registro"))
+                            }
+                        } else {
+                            _registerResult.value = Result.failure(task.exception ?: Exception("Error al registrar usuario"))
+                        }
+                    }
             } catch (e: Exception) {
                 _registerResult.value = Result.failure(e)
             }
@@ -93,5 +122,6 @@ class AuthViewModel(
 
     fun signOut() {
         googleAuthManager.signOut()
+        auth.signOut()
     }
 } 

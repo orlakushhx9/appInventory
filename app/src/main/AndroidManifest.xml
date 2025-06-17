@@ -35,6 +35,8 @@
             android:name=".MainActivity"
             android:exported="true" />
 
+        <activity android:name=".ui.auth.ForgotPasswordConfirmationActivity" />
+
     </application>
 
 </manifest>
