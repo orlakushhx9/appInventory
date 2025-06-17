@@ -96,6 +96,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.googleSignInButton.setOnClickListener {
+            googleAuthManager.signOut()
             val signInIntent = viewModel.getGoogleSignInIntent()
             googleSignInLauncher.launch(signInIntent)
         }
