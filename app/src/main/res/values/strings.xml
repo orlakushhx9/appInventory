@@ -52,4 +52,11 @@
     <string name="navigation_drawer_open">Abrir menú de navegación</string>
     <string name="navigation_drawer_close">Cerrar menú de navegación</string>
     <string name="olvidaste_tu_contrase_a">¿Olvidaste tu contraseña?</string>
+    
+    <!-- Password Validation -->
+    <string name="password_weak">Contraseña Débil</string>
+    <string name="password_medium">Contraseña Media</string>
+    <string name="password_strong">Contraseña Fuerte</string>
+    <string name="password_requirements">Requisitos de contraseña</string>
+    <string name="password_missing_requirements">Faltan requisitos</string>
 </resources>

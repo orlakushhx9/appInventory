@@ -21,6 +21,8 @@ object RetrofitClient {
             override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
         })
 
+
+
         val sslContext = SSLContext.getInstance("SSL")
         sslContext.init(null, trustAllCerts, SecureRandom())
 

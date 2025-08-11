@@ -16,6 +16,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.example.InventarioApp.utils.InputValidator
 
 class ProductsFragment : Fragment() {
     private var _binding: FragmentProductsBinding? = null
@@ -87,12 +88,37 @@ class ProductsFragment : Fragment() {
             .setView(dialogBinding.root)
             .setPositiveButton("Guardar") { _, _ ->
                 val nombre = dialogBinding.editTextName.text.toString()
-                val cantidad = dialogBinding.editTextQuantity.text.toString().toIntOrNull() ?: 0
-                val precio = dialogBinding.editTextPrice.text.toString().toDoubleOrNull() ?: 0.0
-                val stock = dialogBinding.editTextStock.text.toString().toIntOrNull() ?: 0
+                val cantidad = dialogBinding.editTextQuantity.text.toString()
+                val precio = dialogBinding.editTextPrice.text.toString()
+                val stock = dialogBinding.editTextStock.text.toString()
 
-                if (nombre.isNotBlank()) {
-                    viewModel.addProducto(nombre, cantidad, precio, stock)
+                // Validar todos los campos
+                val nombreValidation = InputValidator.validateProductName(nombre)
+                val cantidadValidation = InputValidator.validateQuantity(cantidad)
+                val precioValidation = InputValidator.validatePrice(precio)
+                val stockValidation = InputValidator.validateStock(stock)
+
+                if (nombreValidation.isValid && cantidadValidation.isValid && 
+                    precioValidation.isValid && stockValidation.isValid) {
+                    
+                    val cantidadInt = cantidad.toInt()
+                    val precioDouble = precio.toDouble()
+                    val stockInt = stock.toInt()
+                    
+                    viewModel.addProducto(nombre, cantidadInt, precioDouble, stockInt)
+                } else {
+                    // Mostrar errores de validación
+                    val errorMessages = mutableListOf<String>()
+                    if (!nombreValidation.isValid) errorMessages.add(nombreValidation.errorMessage)
+                    if (!cantidadValidation.isValid) errorMessages.add(cantidadValidation.errorMessage)
+                    if (!precioValidation.isValid) errorMessages.add(precioValidation.errorMessage)
+                    if (!stockValidation.isValid) errorMessages.add(stockValidation.errorMessage)
+                    
+                    Snackbar.make(
+                        binding.root,
+                        "Errores de validación:\n${errorMessages.joinToString("\n")}",
+                        Snackbar.LENGTH_LONG
+                    ).show()
                 }
             }
             .setNegativeButton("Cancelar", null)
@@ -114,12 +140,37 @@ class ProductsFragment : Fragment() {
             .setView(dialogBinding.root)
             .setPositiveButton("Actualizar") { _, _ ->
                 val nombre = dialogBinding.editTextName.text.toString()
-                val cantidad = dialogBinding.editTextQuantity.text.toString().toIntOrNull() ?: 0
-                val precio = dialogBinding.editTextPrice.text.toString().toDoubleOrNull() ?: 0.0
-                val stock = dialogBinding.editTextStock.text.toString().toIntOrNull() ?: 0
+                val cantidad = dialogBinding.editTextQuantity.text.toString()
+                val precio = dialogBinding.editTextPrice.text.toString()
+                val stock = dialogBinding.editTextStock.text.toString()
 
-                if (nombre.isNotBlank()) {
-                    viewModel.updateProducto(producto.id, nombre, cantidad, precio, stock)
+                // Validar todos los campos
+                val nombreValidation = InputValidator.validateProductName(nombre)
+                val cantidadValidation = InputValidator.validateQuantity(cantidad)
+                val precioValidation = InputValidator.validatePrice(precio)
+                val stockValidation = InputValidator.validateStock(stock)
+
+                if (nombreValidation.isValid && cantidadValidation.isValid && 
+                    precioValidation.isValid && stockValidation.isValid) {
+                    
+                    val cantidadInt = cantidad.toInt()
+                    val precioDouble = precio.toDouble()
+                    val stockInt = stock.toInt()
+                    
+                    viewModel.updateProducto(producto.id, nombre, cantidadInt, precioDouble, stockInt)
+                } else {
+                    // Mostrar errores de validación
+                    val errorMessages = mutableListOf<String>()
+                    if (!nombreValidation.isValid) errorMessages.add(nombreValidation.errorMessage)
+                    if (!cantidadValidation.isValid) errorMessages.add(cantidadValidation.errorMessage)
+                    if (!precioValidation.isValid) errorMessages.add(precioValidation.errorMessage)
+                    if (!stockValidation.isValid) errorMessages.add(stockValidation.errorMessage)
+                    
+                    Snackbar.make(
+                        binding.root,
+                        "Errores de validación:\n${errorMessages.joinToString("\n")}",
+                        Snackbar.LENGTH_LONG
+                    ).show()
                 }
             }
             .setNegativeButton("Cancelar", null)

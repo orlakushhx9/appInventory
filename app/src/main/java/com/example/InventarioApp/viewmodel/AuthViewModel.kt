@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.InventarioApp.data.GoogleAuthManager
+import com.example.InventarioApp.utils.EncryptionUtils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
@@ -89,17 +90,33 @@ class AuthViewModel(
     fun register(username: String, email: String, password: String, fullName: String) {
         viewModelScope.launch {
             try {
+                // Encriptar datos antes de enviar a Firebase
+                val encryptedData = EncryptionUtils.createEncryptedPayload(
+                    mapOf(
+                        "username" to username,
+                        "email" to email,
+                        "password" to password,
+                        "fullName" to fullName,
+                        "timestamp" to System.currentTimeMillis(),
+                        "deviceInfo" to "Android_${android.os.Build.VERSION.RELEASE}"
+                    )
+                )
+                
+
+                
                 auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             val user = auth.currentUser
                             if (user != null) {
-                                // Guardar datos adicionales en Firestore
+                                // Guardar datos adicionales encriptados en Firestore
                                 val userMap = hashMapOf(
                                     "uid" to user.uid,
                                     "email" to user.email,
                                     "username" to username,
-                                    "fullName" to fullName
+                                    "fullName" to fullName,
+                                    "encryptedData" to encryptedData,
+                                    "registrationTimestamp" to System.currentTimeMillis()
                                 )
                                 db.collection("users").document(user.uid).set(userMap)
                                 _registerResult.value = Result.success(user)
