@@ -17,11 +17,14 @@ import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
 import android.app.AlertDialog
 import android.widget.EditText
+import com.example.InventarioApp.utils.InputValidator
+import com.example.InventarioApp.utils.SessionManager
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private lateinit var viewModel: AuthViewModel
     private lateinit var googleAuthManager: GoogleAuthManager
+    private lateinit var sessionManager: SessionManager
 
     private val googleSignInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -44,6 +47,7 @@ class LoginActivity : AppCompatActivity() {
         setupViewModel()
         setupClickListeners()
         observeViewModel()
+        setupSessionManager()
 
         val tvForgotPassword = findViewById<TextView>(R.id.tvForgotPassword)
         tvForgotPassword.setOnClickListener {
@@ -131,20 +135,42 @@ class LoginActivity : AppCompatActivity() {
     private fun validateInput(email: String, password: String): Boolean {
         var isValid = true
 
-        if (email.isBlank()) {
-            binding.usernameLayout.error = "Email is required"
+        // Validar email
+        val emailValidation = InputValidator.validateEmail(email)
+        if (!emailValidation.isValid) {
+            binding.usernameLayout.error = emailValidation.errorMessage
             isValid = false
         } else {
             binding.usernameLayout.error = null
         }
 
-        if (password.isBlank()) {
-            binding.passwordLayout.error = "Password is required"
+        // Validar contraseña
+        val passwordValidation = InputValidator.validatePassword(password)
+        if (!passwordValidation.isValid) {
+            binding.passwordLayout.error = passwordValidation.errorMessage
             isValid = false
         } else {
             binding.passwordLayout.error = null
         }
 
         return isValid
+    }
+    
+    private fun setupSessionManager() {
+        sessionManager = SessionManager.getInstance(this)
+        sessionManager.setupActivityMonitoring(this)
+        // NO iniciar timeout aquí - solo configurar monitoreo
+        android.util.Log.d("LoginActivity", "SessionManager configurado - sin timeout (usuario no logueado)")
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        // NO reiniciar timer en LoginActivity - usuario no está logueado
+        android.util.Log.d("LoginActivity", "onResume - sin reiniciar timer (usuario no logueado)")
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        sessionManager.stopSession()
     }
 } 

@@ -90,7 +90,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="4dp"
                     android:hint="@string/password"
                     app:endIconMode="password_toggle">
 
@@ -101,6 +101,49 @@
                         android:inputType="textPassword" />
 
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Indicador de fortaleza de contraseña -->
+                <LinearLayout
+                    android:id="@+id/passwordStrengthContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/passwordStrengthText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:id="@+id/passwordStrengthBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="4dp"
+                        android:background="@drawable/password_strength_background"
+                        android:orientation="horizontal">
+
+                        <View
+                            android:id="@+id/passwordStrengthIndicator"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="0"
+                            android:background="@drawable/password_strength_weak" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/passwordRequirementsText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textSize="10sp"
+                        android:textColor="@android:color/darker_gray" />
+
+                </LinearLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/confirmPasswordLayout"
